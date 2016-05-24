@@ -40,7 +40,14 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
 endif()
 
 add_library(${PROJECT_NAME} src/console.cpp)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+if(ANDROID)
+  find_library(ANDROID_LIB android)
+  find_library(ANDROID_LOG log)
+  target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ANDROID_LIB ANDROID_LOG)
+  MESSAGE("Using Android!")
+else()
+  target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+endif()
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION
                ${CONSOLE_BRIDGE_MAJOR_VERSION}.${CONSOLE_BRIDGE_MINOR_VERSION})
 

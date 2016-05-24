@@ -39,6 +39,10 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdarg>
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 
 /// @cond IGNORE
 
@@ -103,6 +107,15 @@ console_bridge::OutputHandler* console_bridge::getOutputHandler(void)
 
 void console_bridge::log(const char *file, int line, LogLevel level, const char* m, ...)
 {
+#ifdef __ANDROID__
+        va_list __ap;
+        va_start(__ap, m);
+        char buf[MAX_BUFFER_SIZE];
+        vsnprintf(buf, sizeof(buf), m, __ap);
+        va_end(__ap);
+        buf[MAX_BUFFER_SIZE - 1] = '\0';
+	__android_log_print(ANDROID_LOG_DEBUG, "CONSOLE_BRIDGE", buf);
+#else
     USE_DOH;
     if (doh->output_handler_ && level >= doh->logLevel_)
     {
@@ -115,6 +128,7 @@ void console_bridge::log(const char *file, int line, LogLevel level, const char*
 
         doh->output_handler_->log(buf, level, file, line);
     }
+#endif
 }
 
 void console_bridge::setLogLevel(LogLevel level)
